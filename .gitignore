@@ -1,0 +1,9 @@
+.DS_STORE
+nvim/.config/nvim/lazy-lock.json
+.config/zsh/*
+.config/com.raspberrypi.connect
+.config/nextjs-nodejs
+.config/obsidian
+.config/pulse
+.config/systemd
+package*.json
