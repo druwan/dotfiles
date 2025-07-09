@@ -1,0 +1,16 @@
+[window]
+decorations = "full"
+
+[window.padding]
+x = 5
+y = 0
+
+[font]
+size = 14
+
+[font.normal]
+family = "JetBrainsMonoNL Nerd Font Mono"
+
+[general]
+# themes from https://github.com/alacritty/alacritty-theme
+import = ["~/.config/alacritty/catppuccin-mocha.toml"]

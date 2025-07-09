@@ -1,0 +1,9 @@
+{{ if ne .chezmoi.hostname "MBA.local" }}
+["mise"]
+type = "archive"
+stripComponents = 1
+exact = true
+executable = true
+url = "https://github.com/jdx/mise/releases/latest/download/mise-{{.chezmoi.os}}-{{.chezmoi.arch}}.tar.gz"
+dest = ".local/bin"
+{{ end }}

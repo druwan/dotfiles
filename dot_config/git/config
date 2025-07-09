@@ -1,0 +1,26 @@
+# This is Git's per-user configuration file.
+[user]
+	email = christophervestman@gmail.com
+	name = Christopher Vestman
+[init]
+	defaultBranch = main
+[color]
+	branch = auto
+	diff = auto
+	interactive = auto
+	status = auto
+	ui = true
+[core]
+	autocrlf = input
+	eol = lf
+	editor = vi
+[pull]
+	rebase = true
+[alias]
+	aliases = config --get-regexp '^alias\\.'
+	cm = commit -vm
+	glo = log --oneline
+	last = log -1 HEAD
+	st = status
+	uncommit = reset --soft HEAD^
+	unstage = reset HEAD --

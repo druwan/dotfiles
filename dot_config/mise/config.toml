@@ -1,0 +1,9 @@
+[tools]
+bat = "latest"
+chezmoi = "latest"
+fzf = "latest"
+lsd = "latest"
+neovim = "latest"
+node = "latest"
+python = "latest"
+ripgrep = "latest"
