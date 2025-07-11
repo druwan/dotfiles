@@ -7,5 +7,5 @@ executable = true
 {{ $arch := .chezmoi.arch }}
 {{ if eq $arch "amd64" }}{{ $arch = "x64" }}{{ end }}
 url = "https://mise.jdx.dev/mise-latest-{{.chezmoi.os}}-{{$arch}}"
-dest = ".local/bin"
+dest = "/usr/local/bin"
 {{ end }}
