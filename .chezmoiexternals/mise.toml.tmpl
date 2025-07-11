@@ -4,6 +4,8 @@ type = "archive"
 stripComponents = 1
 exact = true
 executable = true
-url = "https://mise.jdx.dev/mise-{{.chezmoi.os}}-{{.chezmoi.arch}}"
+{{ $arch := .chezmoi.arch }}
+{{ if eq $arch "x86_64" }}{{ $arch = "x64" }}{{ end }}
+url = "https://mise.jdx.dev/mise-{{.chezmoi.os}}-{{$arch}}"
 dest = ".local/bin"
 {{ end }}
