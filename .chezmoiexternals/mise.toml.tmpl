@@ -1,11 +1,11 @@
 {{ if ne .chezmoi.hostname "MBA" }}
 ["mise"]
-type = "archive"
+type = "file"
 stripComponents = 1
 exact = true
 executable = true
 {{ $arch := .chezmoi.arch }}
-{{ if eq $arch "x86_64" }}{{ $arch = "x64" }}{{ end }}
-url = "https://mise.jdx.dev/mise-{{.chezmoi.os}}-{{$arch}}"
+{{ if eq $arch "amd64" }}{{ $arch = "x64" }}{{ end }}
+url = "https://mise.jdx.dev/mise-latest-{{.chezmoi.os}}-{{$arch}}"
 dest = ".local/bin"
 {{ end }}
