@@ -44,6 +44,7 @@ alias vim="nvim"
 export EDITOR="nvim"
 export VISUAL="nvim"
 
+
 export DOTFILES="$HOME/.local/share/chezmoi"
 export GITHUB_USERNAME="druwan"
 export LANG=en_US.UTF-8
@@ -96,6 +97,9 @@ fi
 if command -v kubectl > /dev/null; then
   source <(kubectl completion zsh)
 fi
+
+alias k="kubectl"
+compdef k=kubectl
 
 if command -v minikube > /dev/null; then
   source <(minikube completion zsh)
