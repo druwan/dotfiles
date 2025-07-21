@@ -118,6 +118,9 @@ if command -v mise > /dev/null; then
   eval "$($MISERUN activate zsh)"
 fi
 
+if command -v helm > /dev/null; then
+  source <(helm completion zsh)
+fi
 
 if [ -f "$HOME/.privaterc.sh" ]; then
     source "$HOME/.privaterc.sh"
