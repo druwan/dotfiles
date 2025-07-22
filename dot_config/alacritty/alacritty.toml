@@ -13,4 +13,5 @@ family = "JetBrainsMonoNL Nerd Font Mono"
 
 [general]
 # themes from https://github.com/alacritty/alacritty-theme
-import = ["~/.config/alacritty/catppuccin-mocha.toml"]
+# import = ["~/.config/alacritty/catppuccin-mocha.toml"]
+import = ["~/.config/alacritty/tokyonight-night.toml"]
