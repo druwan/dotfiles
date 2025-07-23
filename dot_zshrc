@@ -126,6 +126,10 @@ if command -v gh > /dev/null; then
   source <(gh completion -s zsh)
 fi
 
+if command -v flux > /dev/null; then
+  source <(flux completion zsh)
+fi
+
 if [ -f "$HOME/.privaterc.sh" ]; then
     source "$HOME/.privaterc.sh"
 fi
