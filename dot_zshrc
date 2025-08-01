@@ -33,9 +33,9 @@ fi
 
 if command -v lsd > /dev/null; then
   alias ls="lsd"
-  alias la="ls -alrh -snew"
+  alias la="ls -alh"
   alias ll="ls -lh"
-  alias lla="ls -lha"
+  alias lls="ls -alhSr"
 fi
 
 alias v="nvim"
