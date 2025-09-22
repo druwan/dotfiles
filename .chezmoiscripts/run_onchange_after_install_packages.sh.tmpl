@@ -1,11 +1,17 @@
+{{ if eq .chezmoi.os "linux" -}}
 #!/bin/sh
 # packages hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
 MISE_BIN="$(command -v mise)"
 
-if [[ -z "$MISE_BIN" ]]; then
+if [ -z "$MISE_BIN" ]; then
   echo "mise not found in path"
   exit 1
 fi
 
-"$MISE_BIN" trust $HOME/.config/mise/config.toml && "$MISE_BIN" install
+"$MISE_BIN" trust "$HOME/.config/mise/config.toml" && "$MISE_BIN" install
+{{ else if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+# No mise setup on macOS
+exit 0
+{{ end -}}
