@@ -33,9 +33,8 @@ fi
 
 if command -v lsd > /dev/null; then
   alias ls="lsd"
-  alias la="ls -alh"
-  alias ll="ls -lh"
-  alias lls="ls -alhSr"
+  alias la="ls -alh --group-dirs first --sort version"
+  alias ll="ls -l --group-dirs first --sort version"
 fi
 
 alias v="nvim"
