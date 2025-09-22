@@ -38,7 +38,7 @@ if command -v lsd > /dev/null; then
 fi
 
 if command -v tree > /dev/null; then
-  alias tree="tree -v"
+  alias tree="tree -v --dirsfirst"
 fi
 
 alias v="nvim"
