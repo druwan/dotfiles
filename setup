@@ -2,14 +2,12 @@
 
 set -euo pipefail
 
-XDG_CONFIG_HOME="$HOME/.config"
-
 if command -v zsh >/dev/null; then
   sudo chsh -s "$(command -v zsh)" "$USER"
 fi
 
 if ! command -v chezmoi >/dev/null; then
-  sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- -b "$HOME/.local/bin/" init --apply --ssh ssh://git@github.com/druwan/dotfiles
+  sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply git@github.com:druwan/dotfiles.git
 fi
 
 if ! command -v starship >/dev/null; then
