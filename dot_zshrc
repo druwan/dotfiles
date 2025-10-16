@@ -3,7 +3,7 @@
 autoload -Uz compinit
 compinit
 
-OS="$(uname)" 
+OS="$(uname)"
 
 # Detect if WSL2
 if [[ "$OS" == "Linux" ]]; then
@@ -14,10 +14,23 @@ fi
 case "$OS" in
   "Darwin")
     export NOTES="$HOME/Library/CloudStorage/OneDrive-Personal/ObsidianVault"
+    # SSH_AUTH_SOCK
+    if [ -z "$SSH_AUTH_SOCK" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
+      export SSH_AUTH_SOCK=$(launchctl getenv SSH_AUTH_SOCK)
+    fi
     ;;
 
   "WSL2")
     export NOTES="/mnt/c/Users/druwa/OneDrive/ObsidianVault"
+    export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
+    ;;
+  *)
+    if [ -z "$SSH_AUTH_SOCK" ] || [ -z "$SSH_AUTH_SOCK" ]; then
+      export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
+      if [ ! -S "$SSH_AUTH_SOCK" ]; then
+        eval "$(ssh-agent -a $SSH_AUTH_SOCK -s)" > /dev/null
+      fi
+    fi
     ;;
 esac
 
