@@ -1,5 +1,5 @@
 {{ if eq .chezmoi.os "linux" -}}
-#!/bin/sh
+#!/bin/bash
 
 set -euo pipefail
 
@@ -24,7 +24,7 @@ eval "$("$MISE_BIN" activate bash)"
 "$MISE_BIN" install
 
 {{ else if eq .chezmoi.os "darwin" -}}
-#!/bin/sh
+#!/bin/bash
 # No mise setup on macOS
 exit 0
 {{ end -}}
