@@ -1,7 +1,9 @@
 [tools]
 bat = "latest"
 chezmoi = "latest"
+fd = "latest"
 fzf = "latest"
 lsd = "latest"
 neovim = "latest"
 ripgrep = "latest"
+starship = "latest"
