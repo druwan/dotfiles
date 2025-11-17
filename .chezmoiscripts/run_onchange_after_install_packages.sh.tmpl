@@ -2,11 +2,11 @@
 #!/bin/sh
 # packages hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
-MISE_BIN="$(command -v mise)"
+MISE_BIN="$(command -v mise || true)"
 
 if [ -z "$MISE_BIN" ]; then
-  echo "mise not found in path... installing"
-  curl https://mise.run | sh
+  echo "mise not found in path..."
+  exit 0
 fi
 
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml" && "$MISE_BIN" install
