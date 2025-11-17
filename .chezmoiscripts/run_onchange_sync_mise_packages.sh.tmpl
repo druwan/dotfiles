@@ -17,8 +17,18 @@ if [ -z "${MISE_BIN:-}" ]; then
   exit 0
 fi
 
+if [ -n "${ZSH_VERSION:-}" ]; then
+  MISE_SHELL=zsh
+elif [ "${BASH_VERSION:-}" ]; then
+  MISE_SHELL=bash
+else
+  MISE_SHELL=sh
+fi
 
-eval "$("$MISE_BIN" activate zsh)"
+set +u
+eval "$("$MISE_BIN" activate "$MISE_SHELL")"
+set -u
+
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml"
