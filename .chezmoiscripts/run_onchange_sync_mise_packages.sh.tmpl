@@ -25,11 +25,11 @@ else
   MISE_SHELL=sh
 fi
 
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
 set +u
 eval "$("$MISE_BIN" activate "$MISE_SHELL")"
 set -u
-
-export PATH="$HOME/.local/share/mise/shims:$PATH"
 
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml"
 "$MISE_BIN" install
