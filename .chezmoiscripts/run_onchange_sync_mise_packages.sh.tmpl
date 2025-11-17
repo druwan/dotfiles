@@ -18,7 +18,7 @@ if [ -z "${MISE_BIN:-}" ]; then
 fi
 
 
-eval "$("$MISE_BIN" activate bash)"
+eval "$("$MISE_BIN" activate zsh)"
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml"
