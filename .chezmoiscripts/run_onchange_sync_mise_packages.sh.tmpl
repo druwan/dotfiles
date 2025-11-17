@@ -1,15 +1,24 @@
 {{ if eq .chezmoi.os "linux" -}}
 #!/bin/sh
+
+set -euo pipefail
+
 # packages hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
-export PATH="$HOME/.local/bin:$PATH"
+case ":$PATH:" in
+  *:"$HOME/.local/bin":*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
 
 MISE_BIN="$(command -v mise || true)"
 
-if [ -z "$MISE_BIN" ]; then
-  echo "mise not found in path..."
+if [ -z "${MISE_BIN:-}" ]; then
+  echo "mise not installed - skipping package sync"
   exit 0
 fi
+
+
+eval "$("$MISE_BIN" activate bash)"
 
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml"
 "$MISE_BIN" install
