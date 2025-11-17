@@ -7,7 +7,7 @@ if command -v zsh >/dev/null; then
 fi
 
 if ! command -v chezmoi >/dev/null; then
-  sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply git@github.com:druwan/dotfiles.git
+  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply "git@github.com:druwan/dotfiles.git"
 fi
 
 if ! command -v starship >/dev/null; then
