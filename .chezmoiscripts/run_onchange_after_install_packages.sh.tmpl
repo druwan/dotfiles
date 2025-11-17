@@ -5,8 +5,8 @@
 MISE_BIN="$(command -v mise)"
 
 if [ -z "$MISE_BIN" ]; then
-  echo "mise not found in path"
-  exit 1
+  echo "mise not found in path... installing"
+  curl https://mise.run | sh
 fi
 
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml" && "$MISE_BIN" install
