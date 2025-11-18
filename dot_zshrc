@@ -111,10 +111,10 @@ fi
 
 if command -v kubectl > /dev/null; then
   source <(kubectl completion zsh)
+  alias k="kubectl"
+  compdef k=kubectl
 fi
 
-alias k="kubectl"
-compdef k=kubectl
 
 if command -v minikube > /dev/null; then
   source <(minikube completion zsh)
