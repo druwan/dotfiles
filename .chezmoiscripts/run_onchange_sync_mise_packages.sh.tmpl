@@ -1,41 +1,25 @@
 {{ if eq .chezmoi.os "linux" -}}
-#!/bin/bash
-
-set -euo pipefail
-
+#!/bin/sh
 # packages hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
-case ":$PATH:" in
-  *:"$HOME/.local/bin":*) ;;
-  *) export PATH="$HOME/.local/bin:$PATH" ;;
-esac
-
+PATH="$HOME/.local/bin:$PATH"
 MISE_BIN="$(command -v mise || true)"
 
-if [ -z "${MISE_BIN:-}" ]; then
+if [ -z "$MISE_BIN" ]; then
   echo "mise not installed - skipping package sync"
   exit 0
 fi
 
-if [ -n "${ZSH_VERSION:-}" ]; then
-  MISE_SHELL=zsh
-elif [ "${BASH_VERSION:-}" ]; then
-  MISE_SHELL=bash
-else
-  MISE_SHELL=sh
-fi
 
-export PATH="$HOME/.local/share/mise/shims:$PATH"
+PATH="$HOME/.local/share/mise/shims:$PATH"
 
-set +u
-eval "$("$MISE_BIN" activate "$MISE_SHELL")"
-set -u
+eval "$("$MISE_BIN" activate sh || true)"
 
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml"
 "$MISE_BIN" install
 
 {{ else if eq .chezmoi.os "darwin" -}}
-#!/bin/bash
+#!/bin/sh
 # No mise setup on macOS
 exit 0
 {{ end -}}
