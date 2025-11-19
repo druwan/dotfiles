@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -euo pipefail
+
+if command -v zsh >/dev/null && [ "$SHELL" != "$(command -v zsh)" ]; then
+  chsh -s "$(command -v zsh)" "$USER" || true
+fi

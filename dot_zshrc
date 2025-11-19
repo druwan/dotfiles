@@ -129,8 +129,7 @@ if command -v devpod > /dev/null; then
 fi
 
 if command -v mise > /dev/null; then
-  MISERUN="$(command -v mise)"
-  eval "$($MISERUN activate zsh)"
+  eval "$(mise activate zsh)"
 fi
 
 if command -v helm > /dev/null; then
@@ -145,10 +144,13 @@ if command -v flux > /dev/null; then
   source <(flux completion zsh)
 fi
 
+# Prompt
+if command -v starship >/dev/null; then
+  eval "$(starship init zsh)"
+fi
+
 if [ -f "$HOME/.privaterc.sh" ]; then
     source "$HOME/.privaterc.sh"
 fi
 
-# Prompt
-eval "$(starship init zsh)"
 

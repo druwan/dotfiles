@@ -2,16 +2,12 @@
 
 set -euo pipefail
 
-if command -v zsh >/dev/null; then
-  sudo chsh -s "$(command -v zsh)" "$USER"
+if ! command -v chezmoi >/dev/null 2>&1; then
+  echo "[install.sh] - Installing Chezmoi..."
+  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"
 fi
 
-if ! command -v chezmoi >/dev/null; then
-  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply "git@github.com:druwan/dotfiles.git"
-fi
-
-if ! command -v starship >/dev/null; then
-  curl -sS https://starship.rs/install.sh | sh -s -- -y
-fi
+echo "[install.sh] - Applying dotfiles"
+init --apply "git@github.com:druwan/dotfiles.git"
 
 exit 0
