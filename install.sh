@@ -8,6 +8,6 @@ if ! command -v chezmoi >/dev/null 2>&1; then
 fi
 
 echo "[install.sh] - Applying dotfiles"
-init --apply "git@github.com:druwan/dotfiles.git"
+chezmoi init --apply "$PWD"
 
 exit 0
