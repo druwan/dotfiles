@@ -10,13 +10,8 @@ if [ -z "$MISE_BIN" ]; then
   exit 0
 fi
 
-
-PATH="$HOME/.local/share/mise/shims:$PATH"
-
-eval "$("$MISE_BIN" activate zsh || true)"
-
 "$MISE_BIN" trust "$HOME/.config/mise/config.toml"
-"$MISE_BIN" install
+"$MISE_BIN" install --yes
 
 {{ else if eq .chezmoi.os "darwin" -}}
 #!/bin/sh
