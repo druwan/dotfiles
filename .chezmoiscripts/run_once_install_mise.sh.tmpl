@@ -4,7 +4,7 @@
 set -eu
 
 if ! command -v mise >/dev/null 2>&1; then
-  echo "Installing mise..."
+  echo "[chezmoiscripts/run_once_install_mise.sh.tmpl] - Installing mise..."
   curl -fsSL https://mise.run | sh || true
 fi
 
