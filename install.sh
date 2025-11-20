@@ -2,10 +2,16 @@
 
 set -euo pipefail
 
-mkdir -p "$HOME/.local/bin"
-
 BIN="$HOME/.local/bin"
-DOTFILES_DIR="$HOME/dotfiles"
+
+if command -v zsh >/dev/null; then
+  sudo chsh -s "$(command -v zsh)" "$USER"
+fi
+
+if ! command -v $BIN/mise >/dev/null 2>&1; then
+  echo "Error: mise not found" >&2
+  exit 1
+fi
 
 if ! command -v chezmoi >/dev/null 2>&1; then
   echo "[install.sh] - Installing Chezmoi..."
@@ -13,6 +19,9 @@ if ! command -v chezmoi >/dev/null 2>&1; then
 fi
 
 echo "[install.sh] - Applying dotfiles"
-"$BIN/chezmoi" init --apply --source="$DOTFILES_DIR"
+"$BIN/chezmoi" -- init --apply git@github.com:druwan/dotfiles.git
+
+"$BIN/mise" trust "$HOME/.config/mise/config.toml"
+"$BIN/mise" install --yes
 
 exit 0
