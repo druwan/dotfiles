@@ -1,0 +1,28 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/bin/sh
+
+set -eu pipefail
+
+if ! command -v mise >/dev/null 2>&1; then
+  echo "Installing mise..."
+  curl -fsSL https://mise.run | sh
+fi
+
+export PATH="$HOME/.local/bin:$PATH"
+
+echo "chezmoi walking HERE"
+
+MISE_BIN="$(command -v mise || true)"
+if [ -z "$MISE_BIN" ]; then
+  echo "[chezmoi] mise install failed or not found"
+  exit 0
+fi
+
+"$MISE_BIN" trust "$HOME/.config/mise/config.toml" || true
+"$MISE_BIN" install --yes || true
+
+{{ else if eq .chezmoi.os "darwin" -}}
+#!/bin/sh
+# No mise setup on macOS
+exit 0
+{{ end -}}
