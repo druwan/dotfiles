@@ -23,7 +23,12 @@ MISE_BIN="$(command -v mise || true)"
 if [ -n "$MISE_BIN" ]; then
   "$MISE_BIN" trust "$HOME/.config/mise/config.toml" || true
   "$MISE_BIN" install --yes || true
+  echo "[install.sh] - Done"
+else
+  echo "[install.sh] - mise not found after install"
 fi
-echo "[install.sh] - Done"
+
+# Cleanup
+[ -f "$HOME/install.sh" ] && rm -f "$HOME/install.sh"
 
 exit 0
