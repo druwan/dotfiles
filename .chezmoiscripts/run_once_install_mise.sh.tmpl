@@ -3,6 +3,8 @@
 
 set -eu
 
+echo "RUN_ONCE_MISE_SCRIPT_RUNNING" >> /tmp/mise_log
+
 if ! command -v mise >/dev/null 2>&1; then
   echo "[chezmoiscripts/run_once_install_mise.sh.tmpl] - Installing mise..."
   curl -fsSL https://mise.run | sh || true
