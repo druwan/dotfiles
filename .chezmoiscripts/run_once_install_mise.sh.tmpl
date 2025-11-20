@@ -1,7 +1,7 @@
 {{ if eq .chezmoi.os "linux" -}}
 #!/bin/sh
 
-set -eu pipefail
+set -eu
 
 if ! command -v mise >/dev/null 2>&1; then
   echo "Installing mise..."
