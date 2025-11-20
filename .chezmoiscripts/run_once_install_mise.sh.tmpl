@@ -5,7 +5,7 @@ set -eu
 
 if ! command -v mise >/dev/null 2>&1; then
   echo "Installing mise..."
-  curl -fsSL https://mise.run | sh
+  curl -fsSL https://mise.run | sh || true
 fi
 
 export PATH="$HOME/.local/bin:$PATH"
