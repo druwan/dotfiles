@@ -8,7 +8,7 @@ if command -v zsh >/dev/null; then
   sudo chsh -s "$(command -v zsh)" "$USER"
 fi
 
-if ! command -v $BIN/mise >/dev/null 2>&1; then
+if ! command -v mise >/dev/null 2>&1; then
   echo "Error: mise not found" >&2
   exit 1
 fi
