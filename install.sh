@@ -10,11 +10,8 @@ fi
 
 if ! command -v chezmoi >/dev/null 2>&1; then
   echo "[install.sh] - Installing Chezmoi..."
-  sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$BIN"
+  sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply git@github.com:druwan/dotfiles.git
 fi
-
-echo "[install.sh] - Applying dotfiles"
-"$BIN/chezmoi" -- init --apply git@github.com:druwan/dotfiles.git
 
 #"$BIN/mise" trust "$HOME/.config/mise/config.toml"
 #"$BIN/mise" install --yes
