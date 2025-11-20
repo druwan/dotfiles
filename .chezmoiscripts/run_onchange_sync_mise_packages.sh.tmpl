@@ -2,6 +2,8 @@
 #!/bin/sh
 # packages hash: {{ include "dot_config/mise/config.toml" | sha256sum }}
 
+echo "chezmoi walking HERE"
+
 PATH="$HOME/.local/bin:$PATH"
 MISE_BIN="$(command -v mise || true)"
 
