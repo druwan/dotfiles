@@ -46,8 +46,8 @@ fi
 
 if command -v lsd > /dev/null; then
   alias ls="lsd"
-  alias la="ls -alh --group-dirs first --sort version"
-  alias ll="ls -l --group-dirs first --sort version"
+  alias la="ls -alh --group-dirs first"
+  alias ll="ls -l --group-dirs first"
 fi
 
 if command -v tree > /dev/null; then
