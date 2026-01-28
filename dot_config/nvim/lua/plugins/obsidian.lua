@@ -8,5 +8,9 @@ return {
 		workspaces = {
 			{ name = "personal", path = vim.fn.expand(os.getenv("NOTES")) },
 		},
+
+		templates = {
+			folder = "Templates",
+		},
 	},
 }
