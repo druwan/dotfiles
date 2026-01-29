@@ -35,8 +35,6 @@ return {
 			-- time_format = "%H:%M:%S",
 		},
 
-		disable_frontmatter = true,
-
 		frontmatter = {
 			enabled = true,
 			func = custom_frontmatter,
