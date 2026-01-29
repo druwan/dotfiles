@@ -19,7 +19,7 @@ slug=$(echo "$input" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 
 filename="${slug}.md"
 
 # Title, Pascal Case, frontmatter
-title = $(echo "$input" | sed 's/\b\(.\)/\u\1/g')
+title=$(echo "$input" | sed 's/\b\(.\)/\u\1/g')
 
 inbox_path="$NOTES/0-Inbox"
 note_path="$inbox_path/$filename"

@@ -7,11 +7,13 @@ local function custom_frontmatter(note)
 	local nice_title = vim.env.NVIM_TITLE or note.title or "Untitled"
 	local alias_slug = vim.env.NVIM_ALIAS or note.title or "untitled"
 
+	note.metadata = note.metadata or {}
+
 	return {
 		title = nice_title,
 		alias = os.date("%Y-%m-%d") .. "-" .. alias_slug,
-		created = note.metadata and note.metadata.created or iso_local(),
-		edited = note.metadata and note.metadata.edited or iso_local(),
+		created = note.metadata.created or iso_local(),
+		edited = note.metadata.edited or iso_local(),
 		status = false,
 		tags = { "SortMe" },
 	}
