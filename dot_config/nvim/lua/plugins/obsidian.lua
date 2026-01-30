@@ -13,19 +13,35 @@ end
 ---@param note obsidian.Note
 ---@return ObsidianFrontmatter
 local function custom_frontmatter(note)
-	-- Check if ENVs are set
-	local nice_title = vim.env.NVIM_TITLE or note.title or "Untitled"
-	local alias_slug = vim.env.NVIM_ALIAS or note.title or "untitled"
+	-- Preserve titles
+	local title = "Untitled"
+	if note.metadata and note.metadata.title and note.metadata.title ~= "Untitled" then
+		title = note.metadata.title
+	elseif vim.env.NVIM_TITLE and vim.env.NVIM_TITLE ~= "" then
+		title = vim.env.NVIM_TITLE
+	elseif note.title then
+		title = note.title
+	end
 
-	note.metadata = note.metadata or {}
+	local alias = vim.env.NVIM_ALIAS
+		or (note.metadata and note.metadata.alias)
+		or (note.aliases and note.aliases[1])
+		or (os.date("%Y-%m-%d") .. "-" .. title:lower():gsub("%s+", "-"))
+
+	local tags = { "SortMe" }
+	if note.tags and #note.tags > 0 then
+		tags = note.tags
+	elseif note.metadata and note.metadata.tags and #note.metadata.tags > 0 then
+		tags = note.metadata.tags
+	end
 
 	return {
-		title = nice_title,
-		alias = os.date("%Y-%m-%d") .. "-" .. alias_slug,
-		created = note.metadata.created or iso_local(),
-		edited = note.metadata.edited or iso_local(),
-		status = false,
-		tags = { "SortMe" },
+		title = title,
+		alias = alias,
+		created = (note.metadata and note.metadata.created) or iso_local(),
+		edited = iso_local(),
+		status = (note.metadata and note.metadata.status) or false,
+		tags = tags,
 	}
 end
 
@@ -41,10 +57,7 @@ return {
 		},
 
 		templates = {
-			folder = nil,
-			-- folder = "Templates",
-			-- date_format = "%Y-%m-%d",
-			-- time_format = "%H:%M:%S",
+			folder = "Templates",
 		},
 
 		frontmatter = {
