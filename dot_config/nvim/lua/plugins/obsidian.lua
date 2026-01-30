@@ -2,6 +2,16 @@ local function iso_local()
 	return os.date("%Y-%m-%dT%H:%M:%S") .. string.format(".%03d", math.floor(vim.loop.hrtime() / 1e6) % 1000)
 end
 
+---@class ObsidianFrontmatter
+---@field title string
+---@field alias string
+---@field created string
+---@field edited string
+---@field status boolean
+---@field tags string[]
+
+---@param note obsidian.Note
+---@return ObsidianFrontmatter
 local function custom_frontmatter(note)
 	-- Check if ENVs are set
 	local nice_title = vim.env.NVIM_TITLE or note.title or "Untitled"
@@ -45,6 +55,7 @@ return {
 
 		callbacks = {
 			pre_write_note = function(note)
+				---@type ObsidianFrontmatter
 				note.metadata = note.metadata or {}
 				note.metadata.edited = iso_local()
 			end,
