@@ -2,10 +2,10 @@
 #
 
 # Bail non-interactive shells
-[[ -o interactive && -t 1 ]] || return
+if [[ ! -o interactive && ! -t 1 ]]; then
+  return
+fi
 
-autoload -Uz compinit
-compinit
 
 OS="$(uname)"
 
@@ -18,9 +18,13 @@ fi
 case "$OS" in
   "Darwin")
     export NOTES="$HOME/Library/CloudStorage/OneDrive-Personal/ObsidianVault"
-    # SSH_AUTH_SOCK
-    if [ -z "$SSH_AUTH_SOCK" ] || [ ! -S "$SSH_AUTH_SOCK" ]; then
-      export SSH_AUTH_SOCK=$(launchctl getenv SSH_AUTH_SOCK)
+    if [[ -z "$SSH_AUTH_SOCK" ]] || [[ ! -S "$SSH_AUTH_SOCK" ]]; then
+      SSH_AUTH_SOCK=$(launchctl getenv SSH_AUTH_SOCK)
+      if [[ -n "$SSH_AUTH_SOCK" ]] && [[ -S "$SSH_AUTH_SOCK" ]]; then
+        export SSH_AUTH_SOCK
+      else
+        unset SSH_AUTH_SOCK
+      fi
     fi
     ;;
 
@@ -29,12 +33,12 @@ case "$OS" in
     export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
     ;;
   *)
-    if [ -z "$SSH_AUTH_SOCK" ] || [ -z "$SSH_AUTH_SOCK" ]; then
-      export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
-      if [ ! -S "$SSH_AUTH_SOCK" ]; then
-        eval "$(ssh-agent -a $SSH_AUTH_SOCK -s)" > /dev/null
-      fi
-    fi
+    # if [ -z "$SSH_AUTH_SOCK" ] || [ -z "$SSH_AUTH_SOCK" ]; then
+    #   export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
+    #   if [ ! -S "$SSH_AUTH_SOCK" ]; then
+    #     eval "$(ssh-agent -a $SSH_AUTH_SOCK -s)" > /dev/null
+    #   fi
+    # fi
     ;;
 esac
 
@@ -141,6 +145,9 @@ fi
 if command -v flux > /dev/null; then
   source <(flux completion zsh)
 fi
+
+autoload -Uz compinit
+compinit -u
 
 # Prompt
 if command -v starship >/dev/null; then
