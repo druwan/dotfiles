@@ -2,7 +2,7 @@
 #
 
 # Bail non-interactive shells
-[[ -o interactive ]] || return
+[[ -o interactive && -t 1 ]] || return
 
 autoload -Uz compinit
 compinit
