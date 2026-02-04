@@ -73,7 +73,7 @@ fi
   alias ll="ls -lh --group-dirs first"
 
 command -v tree > /dev/null && alias tree="tree -v --dirsfirst"
-command -v kubectl >/dev/null && { source <(kubectl completion zsh); alias k="kubectl"; compdef k=kubectl; }
+command -v kubectl >/dev/null && alias k="kubectl"
 
 
 # NOTE: Tools
@@ -107,6 +107,7 @@ done
 
 autoload -Uz compinit
 compinit -u
+compdef k=kubectl
 
 # NOTE: Private ENV
 [[ -f "$HOME/.privaterc.sh" ]] && source "$HOME/.privaterc.sh"
