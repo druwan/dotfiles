@@ -1,16 +1,28 @@
 #!/bin/zsh
-#
 
 # Bail non-interactive shells
 if [[ ! -o interactive || ! -t 1 ]]; then
   return
 fi
 
+# NOTE: ENV
+export DOTFILES="$HOME/.local/share/chezmoi"
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+export SCRIPTS="$DOTFILES/scripts"
+export PATH="$SCRIPTS:$HOME/.local/bin:$PATH"
+
+export EDITOR="nvim"
+export VISUAL="nvim"
+export GITHUB_USERNAME="druwan"
+export LANG=en_US.UTF-8
+
+mkdir -p "$ZSH_CACHE_DIR/completions"
+
 autoload -Uz compinit
 compinit -u
 
+# NOTE: Detect OS
 OS="$(uname)"
-
 # Detect if WSL2
 if [[ "$OS" == "Linux" ]]; then
   OS_RELEASE=$(cat /proc/sys/kernel/osrelease 2>/dev/null)
@@ -21,137 +33,90 @@ case "$OS" in
   "Darwin")
     export NOTES="$HOME/Library/CloudStorage/OneDrive-Personal/ObsidianVault"
     if [[ -z "$SSH_AUTH_SOCK" || ! -S "$SSH_AUTH_SOCK" ]]; then
-      SSH_AUTH_SOCK=$(launchctl getenv SSH_AUTH_SOCK)
-      [[ -S "$SSH_AUTH_SOCK" ]] && export SSH_AUTH_SOCK
+      local MAC_SSH=$(launchctl getenv SSH_AUTH_SOCK)
+      [[ -S "$MAC_SSH" ]] && export SSH_AUTH_SOCK="$MAC_SSH"
+    fi
+    # NOTE: BREW
+    if type brew &>/dev/null; then
+      FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
+      alias update='brew update && brew upgrade && brew upgrade --cask --greedy && ani-cli -U'
     fi
     ;;
-
-  "WSL2")
-    export NOTES="/mnt/c/Users/druwa/OneDrive/ObsidianVault"
-    export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
-    ;;
-  *)
-    # if [ -z "$SSH_AUTH_SOCK" ] || [ -z "$SSH_AUTH_SOCK" ]; then
-    #   export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
-    #   if [ ! -S "$SSH_AUTH_SOCK" ]; then
-    #     eval "$(ssh-agent -a $SSH_AUTH_SOCK -s)" > /dev/null
-    #   fi
-    # fi
+  "Linux"|"WSL2")
+    [[ "$OS" == "WSL2" ]] && export NOTES="/mnt/c/Users/druwa/OneDrive/ObsidianVault"
+    [[ -z "$SSH_AUTH_SOCK" ]] && export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
     ;;
 esac
 
-
-
-[[ -n "$NOTES" ]] && alias notes="cd \"$NOTES\""
-
-# For MacOS
-if type brew &>/dev/null; then
-  FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-  alias update='brew update && brew upgrade && brew upgrade --cask --greedy && ani-cli -U'
-fi
-
-if command -v lsd > /dev/null; then
-  alias ls="lsd"
-  alias la="ls -alh --group-dirs first"
-  alias ll="ls -l --group-dirs first"
-fi
-
-if command -v tree > /dev/null; then
-  alias tree="tree -v --dirsfirst"
-fi
-
-alias v="nvim"
-alias vi="nvim"
-alias vim="nvim"
-export EDITOR="nvim"
-export VISUAL="nvim"
-
-
-export DOTFILES="$HOME/.local/share/chezmoi"
-export GITHUB_USERNAME="druwan"
-export LANG=en_US.UTF-8
-export PATH="$SCRIPTS:$PATH"
-export SCRIPTS="$DOTFILES/scripts"
-
-# History
-alias history='history 1'
+# NOTE: History
 HISTFILE="$HOME/.zsh_history"
 HIST_STAMPS="dd/mm/yyyy"
 HISTSIZE=100000
 SAVEHIST=100000
-setopt HIST_IGNORE_SPACE
-setopt HIST_IGNORE_DUPS
-setopt SHARE_HISTORY
+setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS SHARE_HISTORY
+
+# NOTE: Aliases
+[[ -n "$NOTES" ]] && alias notes="cd \"$NOTES\""
+alias history='history 1'
+
+if command -v nvim >/dev/null; then
+  alias v="nvim" vi="nvim" vim="nvim"
+else
+  alias v="vim"
+fi
+
+alias ls="ls --color=auto"
+alias ll="ls -lh"
+alias la="ls -lah"
+if command -v lsd > /dev/null; then
+  alias ls="lsd"
+  alias la="ls -alh --group-dirs first"
+fi
+  alias ll="ls -lh --group-dirs first"
+
+command -v tree > /dev/null && alias tree="tree -v --dirsfirst"
+command -v kubectl >/dev/null && { source <(kubectl completion zsh); alias k="kubectl"; compdef k=kubectl; }
 
 
-# Node
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# Python
-export PATH="/usr/local/opt/python/libexec/bin:$PATH"
-[[ ":$PATH:" != *":$HOME/.local/bin:"* ]] && export PATH="$HOME/.local/bin:$PATH"
+# NOTE: Tools
+if command -v mise > /dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 
 if command -v fzf > /dev/null 2>&1; then
   source <(fzf --zsh)
 fi
 
-if command -v uv >/dev/null 2>&1; then
-  eval "$(uv generate-shell-completion zsh)"
-fi
 
-if command -v chezmoi > /dev/null 2>&1; then
-  source <(chezmoi completion zsh)
-fi
+load_completion() {
+  local name=$1
+  local cmd=$2
+  if [[ ! -f "$ZSH_CACHE_DIR/completions/_$name" ]]; then
+    # Only run if tool exist in PATH
+    if command -v "$name" >/dev/null; then
+      echo "Generating completion for $name..."
+      eval "$cmd" > "$ZSH_CACHE_DIR/completions/_$name"
+    fi
+  fi
+}
 
-if command -v kubectl > /dev/null 2>&1; then
-  source <(kubectl completion zsh)
-  alias k="kubectl"
-  compdef k=kubectl
-fi
+for tool in kubectl helm uv chezmoi docker devpod flux; do
+  case $tool in
+    uv) load_completion "uv" "uv generate-shell-completion zsh" ;;
+    *) load_completion "$tool" "$tool completion zsh" ;;
+  esac
+done
 
-
-if command -v minikube > /dev/null 2>&1; then
-  source <(minikube completion zsh)
-fi
-
-if command -v docker > /dev/null 2>&1; then
-  source <(docker completion zsh)
-fi
-
-if command -v devpod > /dev/null 2>&1; then
-  source <(devpod completion zsh)
-fi
-
-if command -v mise > /dev/null 2>&1; then
-  eval "$(mise activate zsh)"
-fi
-
-if command -v helm > /dev/null 2>&1; then
-  source <(helm completion zsh)
-fi
-
-if command -v gh > /dev/null 2>&1; then
-  source <(gh completion -s zsh)
-fi
-
-if command -v flux > /dev/null 2>&1; then
-  source <(flux completion zsh)
-fi
+# NOTE: Private ENV
+[[ -f "$HOME/.privaterc.sh" ]] && source "$HOME/.privaterc.sh"
 
 ZSH_HIGHLIGHT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/zsh-syntax-highlighting"
-if [[ -f "$ZSH_HIGHLIGHT_DIR/zsh-syntax-highlighting.zsh" ]]; then
-    source "$ZSH_HIGHLIGHT_DIR/zsh-syntax-highlighting.zsh"
-fi
+[[ -f "$ZSH_HIGHLIGHT_DIR/zsh-syntax-highlighting.zsh" ]] && source "$ZSH_HIGHLIGHT_DIR/zsh-syntax-highlighting.zsh"
 
-# Prompt
+# NOTE: Prompt
 if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
 
-if [ -f "$HOME/.privaterc.sh" ]; then
-    source "$HOME/.privaterc.sh"
-fi
 
 
