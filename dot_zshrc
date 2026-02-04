@@ -1,10 +1,5 @@
 #!/bin/zsh
 
-# Bail non-interactive shells
-if [[ ! -o interactive || ! -t 1 ]]; then
-  return
-fi
-
 # NOTE: ENV
 export DOTFILES="$HOME/.local/share/chezmoi"
 export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
@@ -16,10 +11,13 @@ export VISUAL="nvim"
 export GITHUB_USERNAME="druwan"
 export LANG=en_US.UTF-8
 
-mkdir -p "$ZSH_CACHE_DIR/completions"
+# NOTE: Activate tools through mise
+if command -v mise > /dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+fi
 
-autoload -Uz compinit
-compinit -u
+mkdir -p "$ZSH_CACHE_DIR/completions"
+fpath=("$ZSH_CACHE_DIR/completions" $fpath)
 
 # NOTE: Detect OS
 OS="$(uname)"
@@ -106,6 +104,9 @@ for tool in kubectl helm uv chezmoi docker devpod flux; do
     *) load_completion "$tool" "$tool completion zsh" ;;
   esac
 done
+
+autoload -Uz compinit
+compinit -u
 
 # NOTE: Private ENV
 [[ -f "$HOME/.privaterc.sh" ]] && source "$HOME/.privaterc.sh"
