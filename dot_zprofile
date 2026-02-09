@@ -8,3 +8,4 @@ if [[ "$OSTYPE" == "darwin" ]]; then
 fi
 
 [[ -f ~/.zshrc ]] && source ~/.zshrc
+[[ -f ~/.privaterc.sh ]] && source ~/.privaterc.sh
