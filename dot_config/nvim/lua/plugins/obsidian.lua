@@ -97,26 +97,33 @@ return {
 			func = function(note)
 				-- Preserve existing,
 				local meta = note.metadata or {}
-				local created, modified = file_times()
+				local created, _ = file_times()
 				local title = meta.title and meta.title ~= "Untitled" and meta.title or resolve_title()
+
+				local modified = meta.modified
+				if vim.bo.modified then
+					modified = iso_local()
+				end
+
 				return {
 					title = title,
 					alias = meta.alias or (os.date("%Y%m%d") .. "-" .. slugify(title)),
 					created = meta.created or created,
-					edited = meta.modified or modified,
+					modified = modified or iso_local(),
 					tags = (note.tags and #note.tags > 0) and note.tags
 						or (meta.tags and #meta.tags > 0) and meta.tags
 						or {},
 				}
 			end,
-			sort = { "title", "alias", "created", "edited", "tags" },
+			sort = { "title", "alias", "created", "modified", "tags" },
 		},
 
 		callbacks = {
 			pre_write_note = function(note)
 				note.metadata = note.metadata or {}
-				local _, modified = file_times()
-				note.metadata.modified = modified
+				if vim.bo.modified then
+					note.metadata.modified = iso_local()
+				end
 			end,
 		},
 	},
