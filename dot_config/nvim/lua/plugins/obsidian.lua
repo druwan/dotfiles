@@ -5,58 +5,92 @@ local function iso_local(t)
 	return string.format("%04d-%02d-%02dT%02d:%02d:%02d", ts.year, ts.month, ts.day, ts.hour, ts.min, ts.sec)
 end
 
--- File creation
-local function file_times()
-	local path = vim.api.nvim_buf_get_name(0)
-	if path and path ~= "" then
-		local stat = uv.fs_stat(path)
-		if stat then
-			return iso_local(stat.birthtime.sec), iso_local(stat.mtime.sec)
-		end
-	end
-	local now = iso_local()
-	return now, now
-end
-
 local function slugify(s)
 	if not s or s == "" then
-		return "untitled"
+		return ""
 	end
-	return s:lower():gsub("%s+", "-"):gsub("[^%a%d%-]", "")
+	return s:lower():gsub("[^a-z0-9]+", "-"):gsub("^%-+", ""):gsub("%-+$", "")
 end
 
-local function resolve_title()
-	if vim.env.NVIM_TITLE and vim.env.NVIM_TITLE ~= "" then
-		return vim.env.NVIM_TITLE
-	end
-	local stem = vim.fn.expand("%:t:r")
-	if stem and stem ~= "" then
-		-- de-slug: replace hyphens/underscores with spaces, then capitalize each word
-		local words = {}
-		for word in stem:gsub("[-_]+", " "):gmatch("%S+") do
-			table.insert(words, word:sub(1, 1):upper() .. word:sub(2):lower())
-		end
-		return table.concat(words, " ")
-	end
-	return "Untitled"
-end
-
-local function read_frontmatter_field(field)
-	local lines = vim.api.nvim_buf_get_lines(0, 0, 30, false)
+local function update_frontmatter_on_save()
+	local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
 	local in_frontmatter = false
+	local frontmatter_start = nil
+	local frontmatter_end = nil
+
 	for i, line in ipairs(lines) do
 		if i == 1 and line == "---" then
 			in_frontmatter = true
+			frontmatter_start = i
 		elseif in_frontmatter and line == "---" then
+			frontmatter_end = i
 			break
-		elseif in_frontmatter then
-			local val = line:match("^" .. field .. "%s*:%s*(.+)$")
-			if val then
-				return val
+		end
+	end
+
+	if not frontmatter_start or not frontmatter_end then
+		return
+	end
+
+	-- Find and update the 'modified' line while also sorting the tags-list
+	local now = iso_local()
+	local tags = {}
+	local tags_start = nil
+	local tags_end = nil
+	local modified_line = nil
+
+	-- Parse frontmatter
+	for i = frontmatter_start + 1, frontmatter_end - 1 do
+		local line = lines[i]
+
+		-- Track modified line
+		if line:match("^modified:") then
+			modified_line = i
+		end
+
+		-- Track tags array
+		if line:match("^tags:%s*$") or line:match("^tags:%s*%[") then
+			tags_start = i
+			if line:match("%]") then
+				tags_end = i
+			end
+		elseif tags_start and not tags_end then
+			if line:match("^%s*-%s*(.+)") then
+				local tag = line:match("^%s*-%s*(.+)")
+				table.insert(tags, tag)
+			elseif not line:match("^%s") then
+				tags_end = i - 1
 			end
 		end
 	end
-	return nil
+
+	-- Update modified
+	if modified_line then
+		lines[modified_line] = "modified: " .. now
+	else
+		table.insert(lines, frontmatter_end, "modified: " .. now)
+		frontmatter_end = frontmatter_end + 1
+	end
+
+	-- Sort and rewrite tags if found
+	if tags_start and #tags > 0 then
+		table.sort(tags)
+
+		-- Remove old tag lines (if tags_end exists and is valid)
+		if tags_end and tags_end >= tags_start + 1 then
+			for i = tags_end, tags_start + 1, -1 do
+				table.remove(lines, i)
+			end
+		end
+
+		-- Insert sorted tags
+		lines[tags_start] = "tags:"
+		for i, tag in ipairs(tags) do
+			table.insert(lines, tags_start + i, "  - " .. tag)
+		end
+	end
+	vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+	vim.bo.modified = false
 end
 
 return {
@@ -70,59 +104,42 @@ return {
 			{ name = "personal", path = vim.fn.expand(os.getenv("NOTES")) },
 		},
 
+		-- Disable default frontmatter
+		frontmatter = { enabled = false },
+
 		templates = {
 			folder = "Templates",
 			substitutions = {
-				iso_created = function()
-					return read_frontmatter_field("created") or (file_times())
+				title = function()
+					return vim.env.NVIM_TITLE or "Untitled"
 				end,
-
-				iso_modified = function()
-					local _, modified = file_times()
-					return modified
+				slug = function()
+					return vim.env.NVIM_SLUG or slugify(vim.env.NVIM_TITLE) or "untitled"
 				end,
-
-				alias = function()
-					local stem = vim.fn.expand("%:t:r")
-					local base = (stem and stem ~= "") and stem or vim.env.NVIM_TITLE or "untitled"
-					return os.date("%Y-%m-%d") .. "-" .. slugify(base)
+				created = function()
+					return iso_local()
 				end,
-
-				notetitle = resolve_title,
+				modified = function()
+					return iso_local()
+				end,
 			},
 		},
 
-		frontmatter = {
-			enabled = true,
-			func = function(note)
-				-- Preserve existing,
-				local meta = note.metadata or {}
-				local created, _ = file_times()
-				local title = meta.title and meta.title ~= "Untitled" and meta.title or resolve_title()
-
-				local modified = meta.modified
-				if vim.bo.modified then
-					modified = iso_local()
-				end
-
-				return {
-					title = title,
-					alias = meta.alias or (os.date("%Y%m%d") .. "-" .. slugify(title)),
-					created = meta.created or created,
-					modified = modified or iso_local(),
-					tags = (note.tags and #note.tags > 0) and note.tags
-						or (meta.tags and #meta.tags > 0) and meta.tags
-						or {},
-				}
-			end,
-			sort = { "title", "alias", "created", "modified", "tags" },
-		},
-
 		callbacks = {
-			pre_write_note = function(note)
-				note.metadata = note.metadata or {}
+			post_setup = function()
+				vim.api.nvim_create_autocmd("BufNewFile", {
+					pattern = vim.fn.expand(os.getenv("NOTES")) .. "/Inbox/*.md",
+					callback = function()
+						vim.defer_fn(function()
+							vim.cmd("ObsidianTemplate shell-note")
+						end, 50)
+					end,
+				})
+			end,
+
+			pre_write_note = function()
 				if vim.bo.modified then
-					note.metadata.modified = iso_local()
+					update_frontmatter_on_save()
 				end
 			end,
 		},

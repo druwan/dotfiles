@@ -16,15 +16,11 @@ filename="${slug}.md"
 # Capitalize properly
 title=$(echo "$input" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); print}')
 
-inbox_path="$NOTES/0-Inbox"
+inbox_path="$NOTES/Inbox"
 note_path="$inbox_path/$filename"
 
 export NVIM_TITLE="$title"
 export NVIM_ALIAS="$slug"
 
-if [ ! -f "$note_path" ]; then
-  echo "# ${title}" > "$note_path"
-fi
-
+touch "$note_path"
 nvim "$note_path"
-
