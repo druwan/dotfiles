@@ -9,18 +9,32 @@ fi
 # Combine all args into a single string
 input="$*"
 
-# lowercase-dash-separated-slug, filename & alias
-slug=$(echo "$input" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/-\+/-/g' | sed 's/^-//;s/-$//')
+# Let python handle lowercase-dash-separated-slug, filename & alias
+read -r slug title <<< $(python3 -c "
+import re, sys
+
+def deswedify(s: str) -> str:
+  return s.replace('Å','a').replace('Ä','a').replace('Ö','o').replace('å','a').replace('ä','a').replace('ö','o')
+
+def slugify(s: str) -> str:
+    s = deswedify(s).lower()
+    s = re.sub(r'[^a-z0-9]+', '-', s)
+    return s.strip('-')
+
+
+inp = '$input'
+slug = slugify(inp)
+title = inp.title()
+print(slug, title)
+")
+
 filename="${slug}.md"
-
-# Capitalize properly
-title=$(echo "$input" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); print}')
-
 inbox_path="$NOTES/Inbox"
 note_path="$inbox_path/$filename"
 
 export NVIM_TITLE="$title"
-export NVIM_ALIAS="$slug"
+export NVIM_SLUG="$slug"
+export NVIM_ALIAS="$(date '+%Y-%m-%d')_${slug}"
 
 touch "$note_path"
 nvim "$note_path"

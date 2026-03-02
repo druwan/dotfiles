@@ -5,10 +5,20 @@ local function iso_local(t)
 	return string.format("%04d-%02d-%02dT%02d:%02d:%02d", ts.year, ts.month, ts.day, ts.hour, ts.min, ts.sec)
 end
 
+local function deswedify(s)
+	if not s or s == "" then
+		return ""
+	end
+	s = s:gsub("Å", "a"):gsub("Ä", "a"):gsub("Ö", "o")
+	s = s:gsub("å", "a"):gsub("ä", "a"):gsub("ö", "o")
+	return s
+end
+
 local function slugify(s)
 	if not s or s == "" then
 		return ""
 	end
+	s = deswedify(s)
 	return s:lower():gsub("[^a-z0-9]+", "-"):gsub("^%-+", ""):gsub("%-+$", "")
 end
 
@@ -93,6 +103,30 @@ local function update_frontmatter_on_save()
 	vim.bo.modified = false
 end
 
+local notes_path = vim.fn.expand(os.getenv("NOTES") or "")
+
+vim.api.nvim_create_autocmd("BufReadPost", {
+	pattern = vim.fn.expand(os.getenv("NOTES")) .. "/Inbox/*.md",
+	callback = function()
+		local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+		local is_empty = #lines == 0 or (#lines == 1 and lines[1] == "")
+		if is_empty then
+			vim.defer_fn(function()
+				vim.cmd("ObsidianTemplate shell-note")
+			end, 50)
+		end
+	end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+	pattern = notes_path .. "/**/*.md",
+	callback = function()
+		if vim.bo.modified then
+			update_frontmatter_on_save()
+		end
+	end,
+})
+
 return {
 	"obsidian-nvim/obsidian.nvim",
 	version = "*",
@@ -116,6 +150,10 @@ return {
 				slug = function()
 					return vim.env.NVIM_SLUG or slugify(vim.env.NVIM_TITLE) or "untitled"
 				end,
+				alias = function()
+					local slug = vim.env.NVIM_SLUG or slugify(vim.env.NVIM_TITLE) or "untitled"
+					return os.date("%Y-%m-%d") .. "-" .. slug
+				end,
 				created = function()
 					return iso_local()
 				end,
@@ -126,17 +164,6 @@ return {
 		},
 
 		callbacks = {
-			post_setup = function()
-				vim.api.nvim_create_autocmd("BufNewFile", {
-					pattern = vim.fn.expand(os.getenv("NOTES")) .. "/Inbox/*.md",
-					callback = function()
-						vim.defer_fn(function()
-							vim.cmd("ObsidianTemplate shell-note")
-						end, 50)
-					end,
-				})
-			end,
-
 			pre_write_note = function()
 				if vim.bo.modified then
 					update_frontmatter_on_save()
