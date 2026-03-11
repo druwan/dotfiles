@@ -11,11 +11,6 @@ export VISUAL="nvim"
 export GITHUB_USERNAME="druwan"
 export LANG=en_US.UTF-8
 
-# NOTE: Activate tools through mise
-if command -v mise > /dev/null 2>&1; then
-  eval "$(mise activate zsh)"
-fi
-
 mkdir -p "$ZSH_CACHE_DIR/completions"
 fpath=("$ZSH_CACHE_DIR/completions" $fpath)
 
