@@ -5,9 +5,6 @@ decorations = "full"
 x = 5
 y = 0
 
-[font]
-size = 14
-
 [font.normal]
 family = "JetBrainsMonoNL Nerd Font Mono"
 
