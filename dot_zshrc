@@ -30,6 +30,7 @@ fi
 case "$OS" in
   "Darwin")
     export NOTES="$HOME/Library/CloudStorage/OneDrive-Personal/ObsidianVault"
+    export PATH="/opt/homebrew/opt/curl/bin:/opt/homebrew/bin:$PATH"
     if [[ -z "$SSH_AUTH_SOCK" || ! -S "$SSH_AUTH_SOCK" ]]; then
       local MAC_SSH=$(launchctl getenv SSH_AUTH_SOCK)
       [[ -S "$MAC_SSH" ]] && export SSH_AUTH_SOCK="$MAC_SSH"
