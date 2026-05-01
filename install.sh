@@ -4,8 +4,8 @@ set -euo pipefail
 
 BIN="$HOME/.local/bin"
 
-if command -v zsh >/dev/null; then
-  sudo chsh -s "$(command -v zsh)" "$USER"
+if command -v zsh >/dev/null && command -v chsh >/dev/null; then
+  chsh -s "$(command -v zsh)" "$USER"
 fi
 
 if ! command -v chezmoi >/dev/null 2>&1; then
