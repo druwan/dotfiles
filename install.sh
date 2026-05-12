@@ -4,7 +4,7 @@ set -euo pipefail
 
 BIN="$HOME/.local/bin"
 
-if command -v zsh >/dev/null && command -v chsh >/dev/null && [ "$SHELL" != "$(command -v zsh)" ]; then
+if command -v zsh >/dev/null && command -v chsh >/dev/null && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]; then
   chsh -s "$(command -v zsh)" "$USER"
 fi
 
