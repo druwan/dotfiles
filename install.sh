@@ -4,7 +4,7 @@ set -euo pipefail
 
 BIN="$HOME/.local/bin"
 
-if command -v zsh >/dev/null && command -v chsh >/dev/null; then
+if command -v zsh >/dev/null && command -v chsh >/dev/null && [ "$SHELL" != "$(command -v zsh)" ]; then
   chsh -s "$(command -v zsh)" "$USER"
 fi
 
