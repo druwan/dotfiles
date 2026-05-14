@@ -14,6 +14,9 @@ export LANG=en_US.UTF-8
 mkdir -p "$ZSH_CACHE_DIR/completions"
 fpath=("$ZSH_CACHE_DIR/completions" $fpath)
 
+autoload -Uz compinit
+compinit -u
+
 # NOTE: Detect OS
 OS="$(uname)"
 # Detect if WSL2
@@ -69,7 +72,7 @@ fi
   alias ll="ls -lh --group-dirs first"
 
 command -v tree > /dev/null && alias tree="tree -v --dirsfirst"
-command -v kubectl >/dev/null && alias k="kubectl"
+command -v kubectl >/dev/null && alias k="kubectl" && compdef k=kubectl
 
 
 # NOTE: Tools
@@ -100,10 +103,6 @@ for tool in kubectl helm uv chezmoi docker devpod flux; do
     *) load_completion "$tool" "$tool completion zsh" ;;
   esac
 done
-
-autoload -Uz compinit
-compinit -u
-compdef k=kubectl
 
 # NOTE: Private ENV
 [[ -f "$HOME/.privaterc.sh" ]] && source "$HOME/.privaterc.sh"
