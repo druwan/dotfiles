@@ -97,7 +97,7 @@ load_completion() {
   fi
 }
 
-for tool in kubectl helm uv chezmoi docker devpod flux; do
+for tool in kubectl helm uv chezmoi docker devpod flux arduino-cli; do
   case $tool in
     uv) load_completion "uv" "uv generate-shell-completion zsh" ;;
     *) load_completion "$tool" "$tool completion zsh" ;;
