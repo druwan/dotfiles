@@ -7,6 +7,7 @@ padding = { x = 5, y = 0 }
 
 [font]
 normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold" }
+size = 16
 
 [general]
 # themes from https://github.com/alacritty/alacritty-theme
