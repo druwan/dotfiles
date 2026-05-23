@@ -7,7 +7,10 @@ padding = { x = 5, y = 0 }
 
 [font]
 normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold" }
+
+{{- if eq .chezmoi.os "darwin" }}
 size = 16
+{{- end }}
 
 [general]
 # themes from https://github.com/alacritty/alacritty-theme
