@@ -18,4 +18,8 @@ size = 16
 import = ["~/.config/alacritty/tokyonight-night.toml"]
 
 [terminal]
+{{- if eq .chezmoi.os "darwin" }}
+shell = { program = "/opt/homebrew/bin/tmux", args = ["new-session", "-A", "-s", "default"] }
+{{- else }}
 shell = { program = "tmux", args = ["new-session", "-A", "-s", "default"] }
+{{- end }}
