@@ -4,8 +4,17 @@ set -euo pipefail
 
 BIN="$HOME/.local/bin"
 
-if command -v zsh >/dev/null && command -v chsh >/dev/null && [ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]; then
-  chsh -s "$(command -v zsh)" "$USER"
+if command -v zsh >/dev/null && command -v chsh >/dev/null; then
+  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7 || true)"
+  ZSH_PATH="$(command -v zsh)"
+
+  if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
+    if [ -t 0 ] && [ -w /etc/passwd ]; then
+      chsh -s "$ZSH_PATH" "$USER" || true
+    else
+      echo "[install.sh] - chsh skip in container"
+    fi
+  fi
 fi
 
 if ! command -v chezmoi >/dev/null 2>&1; then
