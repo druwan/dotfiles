@@ -16,3 +16,6 @@ size = 16
 # themes from https://github.com/alacritty/alacritty-theme
 # import = ["~/.config/alacritty/catppuccin-mocha.toml"]
 import = ["~/.config/alacritty/tokyonight-night.toml"]
+
+[terminal]
+shell = { program = "tmux", args = ["new-session", "-A", "-s", "default"] }
