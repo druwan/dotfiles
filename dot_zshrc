@@ -65,11 +65,11 @@ fi
 alias ls="ls --color=auto"
 alias ll="ls -lh"
 alias la="ls -lah"
-if command -v lsd > /dev/null; then
+if command -v lsd > /dev/null 2>&1; then
   alias ls="lsd"
   alias la="ls -alh --group-dirs first"
 fi
-  alias ll="ls -lh --group-dirs first"
+alias ll="ls -lh --group-dirs first"
 
 command -v tree > /dev/null && alias tree="tree -v --dirsfirst"
 command -v kubectl >/dev/null && alias k="kubectl" && compdef k=kubectl
