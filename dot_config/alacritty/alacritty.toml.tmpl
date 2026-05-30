@@ -1,15 +1,18 @@
+{{- $darwin := eq .chezmoi.os "darwin" -}}
+
 [window]
 decorations = "full"
 opacity = 0.6
-blur = true
+blur = {{ not $darwin }}
 padding = { x = 5, y = 0 }
 
 
 [font]
 normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold" }
 
-{{- if eq .chezmoi.os "darwin" }}
+{{- if $darwin }}
 size = 16
+style "Regular"
 {{- end }}
 
 [general]
@@ -18,8 +21,4 @@ size = 16
 import = ["~/.config/alacritty/tokyonight-night.toml"]
 
 [terminal]
-{{- if eq .chezmoi.os "darwin" }}
-shell = { program = "/opt/homebrew/bin/tmux", args = ["new-session", "-A", "-s", "default"] }
-{{- else }}
-shell = { program = "tmux", args = ["new-session", "-A", "-s", "default"] }
-{{- end }}
+shell = { program = "{{ if $darwin }}/opt/homebrew/bin/tmux{{ else }}tmux{{ end }}", args = ["new-session", "-A", "-s", "default"] }
