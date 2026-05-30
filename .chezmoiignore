@@ -1,3 +1,9 @@
 README.md
 install.sh
 setup
+
+{{- $hasSway := and (eq .chezmoi.os "linux") (eq (get .chezmoi.osRelease "variantID") "sway-atomic") -}}
+{{- if not $hasSway }}
+.config/sway
+.config/waybar
+{{- end }}
