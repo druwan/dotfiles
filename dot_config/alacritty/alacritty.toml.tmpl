@@ -6,13 +6,13 @@ opacity = 0.6
 blur = {{ not $darwin }}
 padding = { x = 5, y = 0 }
 
-
+[font]
+{{- if $darwin }}
+normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Regular" }
+size = 16
+{{- else }}
 [font]
 normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold" }
-
-{{- if $darwin }}
-size = 16
-style = "Regular"
 {{- end }}
 
 [general]
