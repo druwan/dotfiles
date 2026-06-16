@@ -11,6 +11,12 @@ restic backup \
   $HOME/Projects \
   $HOME/.ssh \
   $HOME/.aws \
+  --exclude="$HOME/Documents/university.tar.gz" \
+  --exclude="$HOME/Projects/coord-buffer/*.mbtiles" \
+  --exclude="$HOME/Projects/DTED/tarFiles" \
+  --exclude="$HOME/Projects/DTED/DTED" \
+  --exclude="*/node_modules" \
+  --exclude="*/.git" \
   --tag "home" \
   --verbose
 
