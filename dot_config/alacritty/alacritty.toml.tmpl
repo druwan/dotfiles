@@ -1,16 +1,19 @@
 {{- $darwin := eq .chezmoi.os "darwin" -}}
 
-[window]
-decorations = "full"
-opacity = 0.6
-blur = {{ not $darwin }}
-padding = { x = 5, y = 0 }
-
-[font]
 {{- if $darwin }}
+[font]
 normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Regular" }
 size = 16
+[window]
+decorations = "full"
+blur = {{ not $darwin }}
+padding = { x = 5, y = 0 }
+opacity = 1
 {{- else }}
+[window]
+decorations = "full"
+padding = { x = 5, y = 0 }
+opacity = 0.6
 [font]
 normal = { family = "JetBrainsMonoNL Nerd Font Mono", style = "Bold" }
 {{- end }}
