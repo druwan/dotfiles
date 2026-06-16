@@ -1,3 +1,4 @@
+{{ if eq .chezmoi.os "darwin" -}}
 #!/usr/bin/env bash
 # Store password in Keychain first
 # security add-generic-password -a "$USER" -s "restic-mba" -w
@@ -22,3 +23,4 @@ restic forget \
   --tag "home"
 
 echo "Finished $(date +'%Y-%m-%d %H:%M:%S')"
+{{ end -}}
