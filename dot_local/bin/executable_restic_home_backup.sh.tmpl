@@ -1,11 +1,10 @@
 {{ if eq .chezmoi.os "darwin" -}}
 #!/usr/bin/env bash
-# Store password in Keychain first
-# security add-generic-password -a "$USER" -s "restic-mba" -w
+
+source "$HOME/Documents/HomeServer/.privaterc.sh"
 
 export PATH="/opt/homebrew/bin:$PATH"
 export RESTIC_REPOSITORY="sftp:truenas_admin@192.168.1.83:/mnt/main/backups/mba"
-export RESTIC_PASSWORD_COMMAND="security find-generic-password -a $USER -s restic-mba -w"
 
 restic backup \
   $HOME/Documents \
