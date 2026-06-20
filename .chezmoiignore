@@ -7,3 +7,7 @@ setup
 .config/sway
 .config/waybar
 {{- end }}
+
+{{- if ne .chezmoi.os "darwin" }}
+Library/LaunchAgents/com.druwan.restic-backup.plist
+{{ end }}
