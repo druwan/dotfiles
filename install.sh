@@ -5,15 +5,12 @@ set -euo pipefail
 BIN="$HOME/.local/bin"
 
 if command -v zsh >/dev/null && command -v chsh >/dev/null; then
-  CURRENT_SHELL="$(getent passwd "$USER" | cut -d: -f7 || true)"
   ZSH_PATH="$(command -v zsh)"
+  CURRENT_SHELL="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7 || echo "")"
 
   if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
-    if [ -t 0 ] && [ -w /etc/passwd ]; then
-      chsh -s "$ZSH_PATH" "$USER" || true
-    else
-      echo "[install.sh] - chsh skip in container"
-    fi
+    sudo usermod -s "$ZSH_PATH" "$USER" 2>/dev/null ||
+      echo "[install.sh] - could not change shell to zsh"
   fi
 fi
 
