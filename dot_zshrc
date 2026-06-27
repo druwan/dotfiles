@@ -91,7 +91,20 @@ else
 fi
 
 command -v tree > /dev/null && alias tree="tree -v --dirsfirst"
-command -v kubectl >/dev/null && alias k="kubectl" && compdef k=kubectl
+
+if command -v kubectl >/dev/null; then
+  alias k="kubectl"
+  alias kgp="kubectl get pods"
+  alias kgc="kubectl config get-contexts"
+  alias ksc="kubectl config set-context --current --namespace"
+  compdef k=kubectl
+fi
+
+if command -v flux >/dev/null; then
+  alias fgk="flux get kustomizations"
+  alias frk="flux reconcile kustomization"
+fi
+
 [[ "$OS" == "Darwin" ]] && alias update='brew update && brew upgrade && brew upgrade --cask --greedy && ani-cli -U'
 
 # ============================================================
@@ -103,7 +116,6 @@ if command -v mise > /dev/null 2>&1; then
 fi
 
 command -v fzf > /dev/null && source <(fzf --zsh)
-
 
 # ============================================================
 # PRIVATE
