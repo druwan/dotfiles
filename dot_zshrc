@@ -1,6 +1,8 @@
-#!/bin/zsh
+#!/usr/bin/env zsh
 
-# NOTE: ENV
+# ============================================================
+# ENV
+# ============================================================
 export DOTFILES="$HOME/.local/share/chezmoi"
 export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 export SCRIPTS="$DOTFILES/scripts"
@@ -11,91 +13,44 @@ export VISUAL="nvim"
 export GITHUB_USERNAME="druwan"
 export LANG=en_US.UTF-8
 
-mkdir -p "$ZSH_CACHE_DIR/completions"
-fpath=("$ZSH_CACHE_DIR/completions" $fpath)
-
-autoload -Uz compinit
-compinit -u
-
-# NOTE: Detect OS
+# ============================================================
+# DETECT OS
+# ============================================================
 OS="$(uname)"
-# Detect if WSL2
-if [[ "$OS" == "Linux" ]]; then
-  OS_RELEASE=$(cat /proc/sys/kernel/osrelease 2>/dev/null)
-  OS=$([[ "$OS_RELEASE" == *"WSL2"* ]] && echo "WSL2" || echo "Linux")
-fi
+export OS
 
 case "$OS" in
   "Darwin")
     export NOTES="$HOME/Library/CloudStorage/OneDrive-Personal/ObsidianVault"
     export PATH="/opt/homebrew/opt/curl/bin:/opt/homebrew/bin:$PATH"
+
     if [[ -z "$SSH_AUTH_SOCK" || ! -S "$SSH_AUTH_SOCK" ]]; then
-      local MAC_SSH=$(launchctl getenv SSH_AUTH_SOCK)
+      MAC_SSH=$(launchctl getenv SSH_AUTH_SOCK)
       [[ -S "$MAC_SSH" ]] && export SSH_AUTH_SOCK="$MAC_SSH"
     fi
-    # NOTE: BREW
+
     if type brew &>/dev/null; then
       FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-      alias update='brew update && brew upgrade && brew upgrade --cask --greedy && ani-cli -U'
     fi
     ;;
-  "Linux"|"WSL2")
-    [[ "$OS" == "WSL2" ]] && export NOTES="/mnt/c/Users/druwa/OneDrive/ObsidianVault"
+  "Linux")
     [[ -z "$SSH_AUTH_SOCK" ]] && export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/tmp}/ssh-agent.socket"
     ;;
 esac
 
-# NOTE: History
-HISTFILE="$HOME/.zsh_history"
-HIST_STAMPS="dd/mm/yyyy"
-HISTSIZE=100000
-SAVEHIST=100000
-setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS SHARE_HISTORY
-
-# NOTE: Aliases
-[[ -n "$NOTES" ]] && alias notes="cd \"$NOTES\""
-alias history='history 1'
-
-if command -v nvim >/dev/null; then
-  alias v="nvim" vi="nvim" vim="nvim"
-else
-  alias v="vim"
-fi
-
-alias ls="ls --color=auto"
-alias ll="ls -lh"
-alias la="ls -lah"
-if command -v lsd > /dev/null 2>&1; then
-  alias ls="lsd"
-  alias la="ls -alh --group-dirs first"
-fi
-alias ll="ls -lh --group-dirs first"
-
-command -v tree > /dev/null && alias tree="tree -v --dirsfirst"
-command -v kubectl >/dev/null && alias k="kubectl" && compdef k=kubectl
-
-
-# NOTE: Tools
-if command -v mise > /dev/null 2>&1; then
-  eval "$(mise activate zsh)"
-  eval "$(mise completion zsh)"
-fi
-
-if command -v fzf > /dev/null 2>&1; then
-  source <(fzf --zsh)
-fi
-
+# ============================================================
+# COMPLETION
+# ============================================================
+mkdir -p "$ZSH_CACHE_DIR/completions"
+fpath=("$ZSH_CACHE_DIR/completions" $fpath)
+autoload -Uz compinit && compinit -u
 
 load_completion() {
-  local name=$1
-  local cmd=$2
-  if [[ ! -f "$ZSH_CACHE_DIR/completions/_$name" ]]; then
+  local name=$1 cmd=$2
+  [[ ! -f "$ZSH_CACHE_DIR/completions/_$name" ]] && return
     # Only run if tool exist in PATH
-    if command -v "$name" >/dev/null; then
-      echo "Generating completion for $name..."
-      eval "$cmd" > "$ZSH_CACHE_DIR/completions/_$name"
-    fi
-  fi
+    command -v "$name" >/dev/null || return
+    eval "$cmd" > "$ZSH_CACHE_DIR/completions/_$name"
 }
 
 for tool in kubectl helm uv chezmoi docker devpod flux arduino-cli; do
@@ -105,16 +60,61 @@ for tool in kubectl helm uv chezmoi docker devpod flux arduino-cli; do
   esac
 done
 
-# NOTE: Private ENV
+# ============================================================
+# HISTORY
+# ============================================================
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+setopt HIST_IGNORE_SPACE HIST_IGNORE_DUPS SHARE_HISTORY
+
+# ============================================================
+# ALIASES
+# ============================================================
+[[ -n "$NOTES" ]] && alias notes="cd \"$NOTES\""
+alias history='history 1'
+
+if command -v nvim >/dev/null; then
+  alias v="nvim" vi="nvim" vim="nvim"
+else
+  alias v="vim"
+fi
+
+if command -v lsd > /dev/null 2>&1; then
+  alias ls="lsd"
+  alias la="ls -alh --group-dirs first"
+  alias ll="ls -lh --group-dirs first"
+else
+  alias ls="ls --color=auto"
+  alias ll="ls -lh"
+  alias la="ls -lah"
+fi
+
+command -v tree > /dev/null && alias tree="tree -v --dirsfirst"
+command -v kubectl >/dev/null && alias k="kubectl" && compdef k=kubectl
+[[ "$OS" == "Darwin" ]] && alias update='brew update && brew upgrade && brew upgrade --cask --greedy && ani-cli -U'
+
+# ============================================================
+# TOOLS
+# ============================================================
+if command -v mise > /dev/null 2>&1; then
+  eval "$(mise activate zsh)"
+  eval "$(mise completion zsh)"
+fi
+
+command -v fzf > /dev/null && source <(fzf --zsh)
+
+
+# ============================================================
+# PRIVATE
+# ============================================================
 [[ -f "$HOME/.privaterc.sh" ]] && source "$HOME/.privaterc.sh"
 
+# ============================================================
+# PROMPT
+# ============================================================
 ZSH_HIGHLIGHT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh/zsh-syntax-highlighting"
 [[ -f "$ZSH_HIGHLIGHT_DIR/zsh-syntax-highlighting.zsh" ]] && source "$ZSH_HIGHLIGHT_DIR/zsh-syntax-highlighting.zsh"
 
-# NOTE: Prompt
-if command -v starship >/dev/null 2>&1; then
-  eval "$(starship init zsh)"
-fi
-
-
+command -v starship >/dev/null && eval "$(starship init zsh)"
 
