@@ -10,4 +10,6 @@ setup
 
 {{- if ne .chezmoi.os "darwin" }}
 Library/LaunchAgents/com.druwan.restic-backup.plist
-{{ end }}
+Library/LaunchAgents
+Library
+{{- end }}
