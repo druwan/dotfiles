@@ -112,7 +112,7 @@ fi
 # ============================================================
 if command -v mise > /dev/null 2>&1; then
   eval "$(mise activate zsh)"
-  eval "$(mise completion zsh)"
+  load_completion "mise" "mise completion zsh"
 fi
 
 command -v fzf > /dev/null && source <(fzf --zsh)
