@@ -47,7 +47,7 @@ autoload -Uz compinit && compinit -u
 
 load_completion() {
   local name=$1 cmd=$2
-  [[ ! -f "$ZSH_CACHE_DIR/completions/_$name" ]] && return
+  [[ -f "$ZSH_CACHE_DIR/completions/_$name" ]] && return
     # Only run if tool exist in PATH
     command -v "$name" >/dev/null || return
     eval "$cmd" > "$ZSH_CACHE_DIR/completions/_$name"
