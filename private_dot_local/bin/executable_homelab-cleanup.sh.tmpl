@@ -1,0 +1,17 @@
+{{ if eq .chezmoi.os "linux" -}}
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== Homelab cleanup $(date +'%Y-%m-%d %H:%M:%S') ==="
+
+echo "--- Pruning k3s container images ---"
+k3s crictl --timeout 120s rmi --prune
+
+echo "--- Pruning Docker system ---"
+docker system prune -a --volumes --force
+
+echo "--- Vacuuming journal ---"
+journalctl --vacuum-time=7d
+
+echo "=== Done ==="
+{{ end -}}

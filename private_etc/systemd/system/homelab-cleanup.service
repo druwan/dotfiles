@@ -1,0 +1,6 @@
+[Unit]
+Description=Homelab cleanup - prune images, volumes & journal
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/homelab-cleanup.sh

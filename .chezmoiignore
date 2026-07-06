@@ -8,6 +8,10 @@ setup
 .config/waybar
 {{- end }}
 
+{{- if ne .chezmoi.os "linux" }}
+etc/systemd
+{{- end }}
+
 {{- if ne .chezmoi.os "darwin" }}
 Library/LaunchAgents/com.druwan.restic-backup.plist
 Library/LaunchAgents
