@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+{{ if eq .chezmoi.os "linux" -}}
+set -euo pipefail
+
+echo "Setting up homelab-cleanup systemd timer..."
+
+sudo tee /etc/systemd/system/homelab-cleanup.service > /dev/null << 'EOF'
+[Unit]
+Description=Homelab cleanup - prune images, volumes and journal
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/homelab-cleanup.sh
+EOF
+
+sudo tee /etc/systemd/system/homelab-cleanup.timer > /dev/null << 'EOF'
+[Unit]
+Description=Run homelab cleanup bi-weekly
+
+[Timer]
+OnCalendar=Thu *-*~1..7 03:00
+OnCalendar=Thu *-*-15..21 03:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now homelab-cleanup.timer
+
+echo "Done. Timer status:"
+sudo systemctl status homelab-cleanup.timer --no-pager
+{{ end -}}
