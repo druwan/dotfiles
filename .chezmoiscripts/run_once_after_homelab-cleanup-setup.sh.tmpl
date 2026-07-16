@@ -10,7 +10,8 @@ Description=Homelab cleanup - prune images, volumes and journal
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/homelab-cleanup.sh
+Environment=HOME={{ .chezmoi.homeDir }}
+ExecStart={{ .chezmoi.homeDir }}/.local/bin/homelab-cleanup.sh
 EOF
 
 sudo tee /etc/systemd/system/homelab-cleanup.timer > /dev/null << 'EOF'

@@ -1,17 +1,69 @@
-{{ if eq .chezmoi.os "linux" -}}
 #!/usr/bin/env bash
+{{ if eq .chezmoi.os "linux" -}}
 set -euo pipefail
 
-echo "=== Homelab cleanup $(date +'%Y-%m-%d %H:%M:%S') ==="
+# ============================================================
+# Colors
+# ============================================================
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+RESET='\033[0m'
 
-echo "--- Pruning k3s container images ---"
-k3s crictl --timeout 120s rmi --prune
+# ============================================================
+# Logging
+# ============================================================
+log_info()    { echo -e "${CYAN}[$(date '+%Y-%m-%d %H:%M:%S')] [INFO]${RESET}  $*"; }
+log_section() { echo -e "\n${BOLD}${YELLOW}[$(date '+%Y-%m-%d %H:%M:%S')] [----]${RESET}  $*"; }
+log_ok()      { echo -e "${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] [ OK ]${RESET}  $*"; }
+log_error()   { echo -e "${RED}[$(date '+%Y-%m-%d %H:%M:%S')] [ERR ]${RESET}  $*" >&2; }
 
-echo "--- Pruning Docker system ---"
-docker system prune -a --volumes --force
+# ============================================================
+# Cleanup functions
+# ============================================================
 
-echo "--- Vacuuming journal ---"
-journalctl --vacuum-time=7d
+prune_k3s() {
+  log_section "Pruning k3s container images"
+  K3S_OUTPUT=$(k3s crictl --timeout 120s rmi --prune 2>&1)
+  K3S_COUNT=$(echo "$K3S_OUTPUT" | grep -c "^Deleted:" || true)
+  echo "$K3S_OUTPUT"
+  log_ok "k3s: removed ${K3S_COUNT} image(s)"
+}
 
-echo "=== Done ==="
+prune_docker() {
+  log_section "Pruning Docker system"
+  DOCKER_OUTPUT=$(docker system prune -a --volumes --force 2>&1)
+  DOCKER_SPACE=$(echo "$DOCKER_OUTPUT" | grep "Total reclaimed space" | awk '{print $NF}' || echo "0B")
+  echo "$DOCKER_OUTPUT"
+  log_ok "Docker: reclaimed ${DOCKER_SPACE}"
+}
+
+vacuum_journal() {
+  log_section "Vacuuming journal (>7d)"
+  JOURNAL_OUTPUT=$(journalctl --vacuum-time=7d 2>&1)
+  JOURNAL_FREED=$(echo "$JOURNAL_OUTPUT" | grep -oP 'freed \K[^,]+' | tail -1 || echo "0B")
+  echo "$JOURNAL_OUTPUT"
+  log_ok "Journal: freed ${JOURNAL_FREED}"
+}
+
+# ============================================================
+# Main
+# ============================================================
+
+START=$(date +%s)
+log_info "Starting homelab cleanup"
+
+prune_k3s
+prune_docker
+vacuum_journal
+
+END=$(date +%s)
+ELAPSED=$((END - START))
+
+echo -e "\n${BOLD}${GREEN}[$(date '+%Y-%m-%d %H:%M:%S')] [DONE]${RESET}  Cleanup complete in ${ELAPSED}s"
+echo -e "${BOLD}${GREEN}                              k3s images removed : ${K3S_COUNT}${RESET}"
+echo -e "${BOLD}${GREEN}                              Docker space freed  : ${DOCKER_SPACE}${RESET}"
+echo -e "${BOLD}${GREEN}                              Journal freed       : ${JOURNAL_FREED}${RESET}"
 {{ end -}}
