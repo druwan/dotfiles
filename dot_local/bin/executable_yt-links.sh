@@ -10,8 +10,8 @@ OPTIONS:
   -h, --help    Show this help message
 
 EXAMPLES:
-  yt-links.sh https://www.youtube.com/watch?v=NrR_RdRRE2w
-  yt-links.sh https://youtu.be/abc123 https://youtu.be/def456
+  yt-links.sh "https://www.youtube.com/watch?v=NrR_RdRRE2w"
+  yt-links.sh "https://youtu.be/abc123" "https://youtu.be/def456"
 EOF
 }
 
@@ -30,5 +30,5 @@ esac
 
 for link in "$@"; do
   echo -en "Downloading $link"
-  yt-dlp --format "bv*[ext=mp4]+ba[ext=m4a]/[ext=mp4]" "$link" -o /tmp/
+  yt-dlp --format "bv*[ext=mp4]+ba[ext=m4a]/[ext=mp4]" "$link" -o "/tmp/%(title)s.%(ext)s"
 done
