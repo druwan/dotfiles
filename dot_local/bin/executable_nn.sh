@@ -29,12 +29,7 @@ print(slug, title)
 ")
 
 filename="${slug}.md"
-inbox_path="$NOTES/Inbox"
-note_path="$inbox_path/$filename"
-
-export NVIM_TITLE="$title"
-export NVIM_SLUG="$slug"
-export NVIM_ALIAS="$(date '+%Y-%m-%d')_${slug}"
+note_path="/tmp/$filename"
 
 touch "$note_path"
 nvim "$note_path"
