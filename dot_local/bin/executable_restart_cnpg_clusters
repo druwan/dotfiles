@@ -25,13 +25,13 @@ kubectl get clusters.postgresql.cnpg.io --all-namespaces --no-headers \
       awk '{sum+=$1} END {print sum+0}')
 
     if [ "$total_restarts" -gt 0 ]; then
-      echo "Cluster '$name' (ns: $ns) has $total_restarts restart(s), restarting..."
+      echo "$name has $total_restarts restart(s), restarting..."
       if kubectl cnpg restart "$name" -n "$ns"; then
         echo "  OK"
       else
         echo "  FAILED (continuing with next cluster)"
       fi
     else
-      echo "Cluster '$name' (ns: $ns) has 0 restarts, skipping."
+      echo "$name has 0 restarts, skipping."
     fi
   done
