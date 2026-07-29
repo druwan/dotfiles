@@ -12,6 +12,7 @@ export DOTFILES="$HOME/.local/share/chezmoi"
 export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 export SCRIPTS="$DOTFILES/scripts"
 export PATH="$SCRIPTS:$HOME/.local/bin:$PATH"
+export NOTES="$HOME/Documents/Inbox"
 
 export EDITOR="nvim"
 export VISUAL="nvim"
@@ -25,7 +26,6 @@ export OS
 
 case "$OS" in
   "Darwin")
-    export NOTES="$HOME/Library/CloudStorage/OneDrive-Personal/ObsidianVault"
     export PATH="/opt/homebrew/opt/curl/bin:/opt/homebrew/bin:$PATH"
 
     if [[ -z "$SSH_AUTH_SOCK" || ! -S "$SSH_AUTH_SOCK" ]]; then
