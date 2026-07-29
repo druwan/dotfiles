@@ -7,7 +7,7 @@ usage() {
   cat << EOF
 Usage: $SCRIPT_NAME <note title words...>
 
-Create a new markdown note in /var/tmp and opens it in nvim.
+Create a new markdown note in $NOTES and opens it in nvim.
 The title gets slugified.
 
 Options:
@@ -15,7 +15,7 @@ Options:
 
 Example:
   $SCRIPT_NAME "Meeting notes for Q3 planning"
-  -> creates /var/tmp/meeting-notes-for-q3-planning.md
+  -> creates $NOTES/meeting-notes-for-q3-planning.md
 EOF
 }
 
@@ -47,12 +47,12 @@ def slugify(s: str) -> str:
 
 inp = '$input'
 slug = slugify(inp)
-title = inp.title()
+title = inp.capitalize()
 print(slug, title)
 ")
 
 filename="${slug}.md"
-note_path="/var/tmp/$filename"
+note_path="$NOTES/$filename"
 
 touch "$note_path"
 nvim "$note_path"
