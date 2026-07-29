@@ -1,6 +1,11 @@
 #!/usr/bin/env zsh
 
 # ============================================================
+# PRIVATE
+# ============================================================
+[[ -f "$HOME/.privaterc.sh" ]] && source "$HOME/.privaterc.sh"
+
+# ============================================================
 # ENV
 # ============================================================
 export DOTFILES="$HOME/.local/share/chezmoi"
@@ -107,6 +112,11 @@ fi
 
 [[ "$OS" == "Darwin" ]] && alias update='brew update && brew upgrade && brew upgrade --cask --greedy && ani-cli -U'
 
+if command -v aws >/dev/null; then
+  alias aws_ls="aws s3 ls --human-readable --summarize"
+  alias aws_ls_all="aws s3 ls --human-readable --summarize --recursive"
+fi
+
 # ============================================================
 # TOOLS
 # ============================================================
@@ -117,10 +127,6 @@ fi
 
 command -v fzf > /dev/null && source <(fzf --zsh)
 
-# ============================================================
-# PRIVATE
-# ============================================================
-[[ -f "$HOME/.privaterc.sh" ]] && source "$HOME/.privaterc.sh"
 
 # ============================================================
 # PROMPT
