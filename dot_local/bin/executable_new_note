@@ -1,6 +1,29 @@
 #!/bin/zsh
 set -euo pipefail
 
+SCRIPT_NAME="${0:t}"
+
+usage() {
+  cat << EOF
+Usage: $SCRIPT_NAME <note title words...>
+
+Create a new markdown note in /var/tmp and opens it in nvim.
+The title gets slugified.
+
+Options:
+  -h, --help   Show this help message and exit
+
+Example:
+  $SCRIPT_NAME "Meeting notes for Q3 planning"
+  -> creates /var/tmp/meeting-notes-for-q3-planning.md
+EOF
+}
+
+if [ $# -ge 1 ] && { [ "$1" = "-h" ] || [ "$1" = "--help" ]; } ;then
+  usage
+  exit 0
+fi
+
 if [ $# -lt 1 ]; then
   echo -en "Error: missing new note name"
   exit 1
@@ -29,7 +52,7 @@ print(slug, title)
 ")
 
 filename="${slug}.md"
-note_path="/tmp/$filename"
+note_path="/var/tmp/$filename"
 
 touch "$note_path"
 nvim "$note_path"
