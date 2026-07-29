@@ -16,7 +16,6 @@ export PATH="$SCRIPTS:$HOME/.local/bin:$PATH"
 export EDITOR="nvim"
 export VISUAL="nvim"
 export GITHUB_USERNAME="druwan"
-export LANG=en_US.UTF-8
 
 # ============================================================
 # DETECT OS
