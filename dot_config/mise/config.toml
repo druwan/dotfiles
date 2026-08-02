@@ -1,9 +1,12 @@
 [tools]
+aws-cli = "latest"
+azure-cli = "latest"
 bat = "latest"
 chezmoi = "latest"
 fd = "latest"
 flux2 = "latest"
 fzf = "latest"
+k9s = "latest"
 kubectl = "latest"
 lsd = "latest"
 neovim = "latest"
