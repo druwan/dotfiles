@@ -2,13 +2,13 @@
 set -euo pipefail
 
 LOG="$HOME/.local/state/immich-library-mirror.log"
+CACHE="$HOME/.local/state/immich-pvc-name.cache"
 mkdir -p "$(dirname "$LOG")"
-exec >> "$LOG" 2>&1
+exec >>"$LOG" 2>&1
 echo "=== $(date -Iseconds) starting mirror ==="
 
 NAS_HOST="192.168.1.83"
 MOUNT_POINT="/mnt/nas-pvc"
-PVC_ID="pvc-dcf95f0d-b605-4ff5-9a27-6055c7fc5f7a"
 LOCAL_MIRROR="$HOME/immich-photos"
 
 mkdir -p "$LOCAL_MIRROR"
@@ -23,8 +23,21 @@ if ! ping -c1 -W1 "$NAS_HOST" &>/dev/null; then
   exit 1
 fi
 
+# Resolve the current PV name dynamically, falling back to cache if the
+# cluster isn't reachable from this network right now.
+if PVC_ID=$(kubectl get pvc immich-library -n immich -o jsonpath='{.spec.volumeName}' 2>/dev/null) && [[ -n "$PVC_ID" ]]; then
+  echo "$PVC_ID" >"$CACHE"
+  echo "Resolved PV live: $PVC_ID"
+elif [[ -f "$CACHE" ]]; then
+  PVC_ID=$(cat "$CACHE")
+  echo "Cluster unreachable, using cached PV: $PVC_ID"
+else
+  echo "Cluster unreachable and no cache available, aborting."
+  exit 1
+fi
+
 if ! stat "$MOUNT_POINT/$PVC_ID/library" &>/dev/null; then
-  echo "NAS share did not automount or PVC path missing, aborting."
+  echo "NAS share did not automount or path $PVC_ID/library missing, aborting."
   exit 1
 fi
 
