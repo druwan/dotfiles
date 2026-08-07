@@ -17,3 +17,8 @@ Library/LaunchAgents/com.druwan.restic-backup.plist
 Library/LaunchAgents
 Library
 {{- end }}
+
+{{- if ne .chezmoi.hostname "malli" }}
+.local/bin/immich_library_mirror
+.config/systemd/user/immich-library-mirror.service
+{{- end }}

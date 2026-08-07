@@ -1,0 +1,11 @@
+[Unit]
+Description=Mirror Immich photo library from TrueNAS
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/immich_library_mirror
+
+[Install]
+WantedBy=default.target

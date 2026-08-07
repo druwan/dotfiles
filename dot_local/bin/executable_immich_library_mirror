@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOG="$HOME/.local/state/immich-library-mirror.log"
+mkdir -p "$(dirname "$LOG")"
+exec >> "$LOG" 2>&1
+echo "=== $(date -Iseconds) starting mirror ==="
+
+NAS_HOST="192.168.1.83"
+MOUNT_POINT="/mnt/nas-pvc"
+PVC_ID="pvc-dcf95f0d-b605-4ff5-9a27-6055c7fc5f7a"
+LOCAL_MIRROR="$HOME/immich-photos"
+
+mkdir -p "$LOCAL_MIRROR"
+
+for i in $(seq 1 30); do
+  ping -c1 -W1 "$NAS_HOST" &>/dev/null && break
+  sleep 2
+done
+
+if ! ping -c1 -W1 "$NAS_HOST" &>/dev/null; then
+  echo "NAS unreachable after retries, aborting."
+  exit 1
+fi
+
+if ! stat "$MOUNT_POINT/$PVC_ID/library" &>/dev/null; then
+  echo "NAS share did not automount or PVC path missing, aborting."
+  exit 1
+fi
+
+rsync -a --delete "$MOUNT_POINT/$PVC_ID/library/" "$LOCAL_MIRROR/"
+
+echo "=== $(date -Iseconds) done ==="
