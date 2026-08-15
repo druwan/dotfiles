@@ -5,42 +5,69 @@ LOG="$HOME/.local/state/immich-library-mirror.log"
 CACHE="$HOME/.local/state/immich-pvc-name.cache"
 mkdir -p "$(dirname "$LOG")"
 exec >>"$LOG" 2>&1
-echo "=== $(date -Iseconds) starting mirror ==="
+
+log() {
+  printf '[%s] %s\n' "$(date -Iseconds)" "$1"
+}
+
+START_TS=$(date +%s)
+trap 'RC=$?; DUR=$(( $(date +%s) - START_TS )); log "=== finished, exit=$RC, duration=${DUR}s ==="' EXIT
+
+log "=== starting mirror ==="
 
 NAS_HOST="192.168.1.83"
-MOUNT_POINT="/mnt/nas-pvc"
-LOCAL_MIRROR="$HOME/immich-photos"
+MOUNT_POINT="/mnt/pvc"
+LOCAL_MIRROR="/media/hdd/backups/immich-photos"
+
+log "config: NAS_HOST=$NAS_HOST MOUNT_POINT=$MOUNT_POINT LOCAL_MIRROR=$LOCAL_MIRROR"
 
 mkdir -p "$LOCAL_MIRROR"
+log "local mirror dir free space: $(df -h "$LOCAL_MIRROR" | awk 'NR==2 {print $4}')"
 
+log "pinging $NAS_HOST (up to 30 attempts, 2s apart)..."
+REACHABLE=0
 for i in $(seq 1 30); do
-  ping -c1 -W1 "$NAS_HOST" &>/dev/null && break
+  if ping -c1 -W1 "$NAS_HOST" &>/dev/null; then
+    log "NAS reachable after $i attempt(s)"
+    REACHABLE=1
+    break
+  fi
   sleep 2
 done
 
-if ! ping -c1 -W1 "$NAS_HOST" &>/dev/null; then
-  echo "NAS unreachable after retries, aborting."
+if [[ "$REACHABLE" -ne 1 ]]; then
+  log "NAS unreachable after 30 attempts, aborting."
   exit 1
 fi
 
-# Resolve the current PV name dynamically, falling back to cache if the
-# cluster isn't reachable from this network right now.
-if PVC_ID=$(kubectl get pvc immich-library -n immich -o jsonpath='{.spec.volumeName}' 2>/dev/null) && [[ -n "$PVC_ID" ]]; then
+# Resolve the current PV name dynamically, falling back to cache if
+# cluster not reachable right now.
+log "resolving PV name via kubectl..."
+KUBECTL_ERR=$(mktemp)
+if PVC_ID=$(kubectl get pvc immich-library -n immich -o jsonpath='{.spec.volumeName}' 2>"$KUBECTL_ERR") && [[ -n "$PVC_ID" ]]; then
   echo "$PVC_ID" >"$CACHE"
-  echo "Resolved PV live: $PVC_ID"
+  log "Resolved PV live: $PVC_ID"
 elif [[ -f "$CACHE" ]]; then
   PVC_ID=$(cat "$CACHE")
-  echo "Cluster unreachable, using cached PV: $PVC_ID"
+  log "kubectl failed or returned empty (stderr: $(tr '\n' ' ' <"$KUBECTL_ERR")), falling back to cached PV: $PVC_ID"
 else
-  echo "Cluster unreachable and no cache available, aborting."
+  log "kubectl failed (stderr: $(tr '\n' ' ' <"$KUBECTL_ERR")) and no cache available, aborting."
+  rm -f "$KUBECTL_ERR"
   exit 1
 fi
+rm -f "$KUBECTL_ERR"
 
-if ! stat "$MOUNT_POINT/$PVC_ID/library" &>/dev/null; then
-  echo "NAS share did not automount or path $PVC_ID/library missing, aborting."
+SRC="$MOUNT_POINT/$PVC_ID/library"
+log "checking source path: $SRC"
+if ! stat "$SRC" &>/dev/null; then
+  log "source path missing (NAS share did not automount, or path/PV name wrong), aborting."
+  log "contents of $MOUNT_POINT: $(ls -la "$MOUNT_POINT" 2>&1 | tr '\n' ' ')"
   exit 1
 fi
+log "source path OK, contains $(find "$SRC" -maxdepth 1 | wc -l) top-level entries"
 
-rsync -a --delete "$MOUNT_POINT/$PVC_ID/library/" "$LOCAL_MIRROR/"
+log "starting rsync..."
+rsync -a --delete --stats "$SRC/" "$LOCAL_MIRROR/"
+log "rsync completed"
 
-echo "=== $(date -Iseconds) done ==="
+log "local mirror now: $(du -sh "$LOCAL_MIRROR" 2>/dev/null | cut -f1), free space remaining: $(df -h "$LOCAL_MIRROR" | awk 'NR==2 {print $4}')"
